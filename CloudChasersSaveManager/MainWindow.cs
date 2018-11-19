@@ -1,28 +1,13 @@
 ﻿using CloudChasersSaveManager.Binding;
 using CloudChasersSaveManager.ViewModels;
-using System;
 using System.Collections.Generic;
 using Terminal.Gui;
 
 namespace CloudChasersSaveManager
 {
-
     internal class MainWindow : Window
     {
-        private readonly Button _saveAndExitButton;
-        public Action SaveAndExitButtonClick { set => _saveAndExitButton.Clicked = value; }
-
-        private readonly Button _restorePreviousSaveButton;
-        public Action RestorePreviousSaveButtonClick { set => _restorePreviousSaveButton.Clicked = value; }
-
-        private readonly Button _healAllButton;
-        public Action HealAllButtonClick { set => _healAllButton.Clicked = value; }
-
-        private readonly Button _fillLifesButton;
-        public Action FillLifesButtonClick { set => _fillLifesButton.Clicked = value; }
-
-        private readonly Button _fillWaterButton;
-        public Action FillWaterButtonClick { set => _fillWaterButton.Clicked = value; }
+        private const int ButtonsAlignment = 100;
 
         public MainWindow(GameStateViewModel bindSubject)
             : base("Cloud Chasers save manager")
@@ -50,40 +35,48 @@ namespace CloudChasersSaveManager
             inventoryFrame.Add(inventoryView);
             binder.Bind<IList<string>>(nameof(bindSubject.Inventory), inventoryView.SetItems);
 
-            _healAllButton = new Button("Heal all")
+            var healAllButton = new Button("Heal all")
             {
-                X = 100,
+                X = ButtonsAlignment,
                 Y = 2
             };
-            this.Add(_healAllButton);
+            this.Add(healAllButton);
+            healAllButton.Clicked = bindSubject.HealAll;
 
-            _fillLifesButton = new Button("Fill lifes")
+            var fillLifesButton = new Button("Fill lifes")
             {
-                X = 100,
+                X = ButtonsAlignment,
                 Y = 4
             };
-            this.Add(_fillLifesButton);
+            this.Add(fillLifesButton);
+            fillLifesButton.Clicked = bindSubject.FillLifes;
 
-            _fillWaterButton = new Button("Fill water")
+            var fillWaterButton = new Button("Fill water")
             {
-                X = 100,
+                X = ButtonsAlignment,
                 Y = 13
             };
-            this.Add(_fillWaterButton);
+            this.Add(fillWaterButton);
+            fillWaterButton.Clicked = bindSubject.FillWater;
 
-            _restorePreviousSaveButton = new Button("Restore save")
+            if (FileHelper.BackupExists())
             {
-                X = 100,
-                Y = 23
-            };
-            this.Add(_restorePreviousSaveButton);
+                var restorePreviousSaveButton = new Button("Restore backup")
+                {
+                    X = ButtonsAlignment,
+                    Y = 23
+                };
+                this.Add(restorePreviousSaveButton);
+                restorePreviousSaveButton.Clicked = bindSubject.RestorePreviousSave;
+            }
 
-            _saveAndExitButton = new Button("Save & Exit")
+            var saveAndExitButton = new Button("Save & Exit")
             {
-                X = 100,
+                X = ButtonsAlignment,
                 Y = 25
             };
-            this.Add(_saveAndExitButton);
+            this.Add(saveAndExitButton);
+            saveAndExitButton.Clicked = bindSubject.SaveAndExit;
         }
     }
 }

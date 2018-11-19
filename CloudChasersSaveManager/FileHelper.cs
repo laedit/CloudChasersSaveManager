@@ -14,7 +14,7 @@ namespace CloudChasersSaveManager
         internal static void RestoreSaveFile()
         {
             var savePath = GetSavePath();
-            var backupPath = savePath + ".back";
+            var backupPath = GetBackupPath();
             if (File.Exists(backupPath))
             {
                 File.Copy(backupPath, savePath, true);
@@ -25,7 +25,7 @@ namespace CloudChasersSaveManager
         internal static void ReplaceSaveFile(SaveFile saveFile)
         {
             var savePath = GetSavePath();
-            File.Copy(savePath, savePath + ".back", true);
+            File.Copy(savePath, GetBackupPath(), true);
             using (Stream stream = new FileStream(savePath, FileMode.Create, FileAccess.Write, FileShare.None))
             {
                 IFormatter formatter = new BinaryFormatter();
@@ -44,7 +44,17 @@ namespace CloudChasersSaveManager
             }
         }
 
-        internal static string GetSavePath()
+        internal static bool BackupExists()
+        {
+            return File.Exists(GetBackupPath());
+        }
+
+        private static string GetBackupPath()
+        {
+            return GetSavePath() + ".back";
+        }
+
+        private static string GetSavePath()
         {
             return Path.Combine(Environment.ExpandEnvironmentVariables("%USERPROFILE%"), @"AppData\LocalLow\Blindflug_Studios\Cloud Chasers - Journey of Hope\saveGame.gd");
         }
