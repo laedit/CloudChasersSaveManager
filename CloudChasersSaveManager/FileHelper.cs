@@ -36,12 +36,25 @@ namespace CloudChasersSaveManager
 
         internal static SaveFile GetSave()
         {
-            using (Stream stream = new FileStream(GetSavePath(), FileMode.Open, FileAccess.Read, FileShare.Read))
-            {
-                IFormatter formatter = new BinaryFormatter();
+            return LoadSave(GetSavePath());
+        }
 
-                return (SaveFile)formatter.Deserialize(stream);
+        internal static SaveFile LoadSave(string savePath)
+        {
+            if (File.Exists(savePath))
+            {
+                using (Stream stream = new FileStream(savePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    IFormatter formatter = new BinaryFormatter();
+
+                    try
+                    {
+                        return (SaveFile)formatter.Deserialize(stream);
+                    }
+                    catch { }
+                }
             }
+            return null;
         }
 
         internal static bool BackupExists()
@@ -59,16 +72,31 @@ namespace CloudChasersSaveManager
             return Path.Combine(Environment.ExpandEnvironmentVariables("%USERPROFILE%"), @"AppData\LocalLow\Blindflug_Studios\Cloud Chasers - Journey of Hope\saveGame.gd");
         }
 
-        internal static List<GameItem> GetItems()
+        internal static string GetItemsPath()
         {
             var gameFolderPath = GetGameFolderPath();
             if (!string.IsNullOrEmpty(gameFolderPath))
             {
-                var itemsFilePath = Path.Combine(gameFolderPath, "CloudChasers_Win_Data", "StreamingAssets", "JSON", "items.json");
-                if (File.Exists(itemsFilePath))
+                return Path.Combine(gameFolderPath, "CloudChasers_Win_Data", "StreamingAssets", "JSON", "items.json");
+            }
+
+            return null;
+        }
+
+        internal static List<GameItem> GetItems()
+        {
+            return LoadItems(GetItemsPath());
+        }
+
+        internal static List<GameItem> LoadItems(string itemsFilePath)
+        {
+            if (!string.IsNullOrEmpty(itemsFilePath) && File.Exists(itemsFilePath))
+            {
+                try
                 {
                     return JsonConvert.DeserializeObject<List<GameItem>>(File.ReadAllText(itemsFilePath));
                 }
+                catch { }
             }
 
             return null;

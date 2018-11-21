@@ -1,17 +1,19 @@
 ﻿using CloudChasersSaveManager.Binding;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Terminal.Gui;
 
 namespace CloudChasersSaveManager.ViewModels
 {
     internal class GameStateViewModel : ViewModel
     {
-        private readonly SaveFile _saveFile;
-        private readonly List<GameItem> _items;
+        private SaveFile _saveFile;
+        private List<GameItem> _items;
 
-        private readonly float _gliderMaxHealth;
-        private readonly float _maxWater;
+        private float _gliderMaxHealth;
+        private float _maxWater;
 
         private float _waterFraction;
 
@@ -29,51 +31,76 @@ namespace CloudChasersSaveManager.ViewModels
             set => SetField(ref _inventory, value);
         }
 
-        public HumanCharacterViewModel Amelia { get; }
+        public HumanCharacterViewModel Amelia { get; private set; }
 
-        public HumanCharacterViewModel Francisco { get; }
+        public HumanCharacterViewModel Francisco { get; private set; }
 
-        public CharacterViewModel Glider { get; }
+        public CharacterViewModel Glider { get; private set; }
 
-        public GameStateViewModel(SaveFile saveFile, List<GameItem> items)
+        public Func<string> PromptSelectSaveFile { get; set; }
+
+        public Func<string> PromptSelectItemsFile { get; set; }
+
+        public GameStateViewModel()
+        {
+            Amelia = new HumanCharacterViewModel("Amelia");
+            Francisco = new HumanCharacterViewModel("Francisco");
+            Glider = new CharacterViewModel("Glider");
+        }
+
+        private void InitiazeData(SaveFile saveFile, List<GameItem> items)
         {
             _saveFile = saveFile;
             _items = items;
 
             // base 20 + items in inventory with maxHealth
             _gliderMaxHealth = 20
-                + saveFile.GliderBodyInventory.Sum(item => _items.Find(gi => gi.ItemId == item.Value).MaxHealth)
-                 + saveFile.GliderNetInventory.Sum(item => _items.Find(gi => gi.ItemId == item.Value).MaxHealth)
-                  + saveFile.GliderWingInventory.Sum(item => _items.Find(gi => gi.ItemId == item.Value).MaxHealth);
+                + _saveFile.GliderBodyInventory.Sum(item => _items.Find(gi => gi.ItemId == item.Value).MaxHealth)
+                 + _saveFile.GliderNetInventory.Sum(item => _items.Find(gi => gi.ItemId == item.Value).MaxHealth)
+                  + _saveFile.GliderWingInventory.Sum(item => _items.Find(gi => gi.ItemId == item.Value).MaxHealth);
 
             // base 100 + items in inventory with waterStorage
-            _maxWater = 100 + saveFile.MainInventory.Sum(item => _items.Find(gi => gi.ItemId == item.Value).WaterStorage);
+            _maxWater = 100 + _saveFile.MainInventory.Sum(item => _items.Find(gi => gi.ItemId == item.Value).WaterStorage);
 
-            Amelia = new HumanCharacterViewModel("Amelia")
+            Amelia.Health = _saveFile.HealthAmelia / 10;
+            Amelia.HasFracture = _saveFile.FractureSickAmelia.Key;
+            Amelia.IsSick = _saveFile.FractureSickAmelia.Value;
+            Amelia.Inventory = GetNames(_saveFile.AmeliaInventory);
+
+            Francisco.Health = _saveFile.HealthFrancisco / 15;
+            Francisco.HasFracture = _saveFile.FractureSickFrancisco.Key;
+            Francisco.IsSick = _saveFile.FractureSickFrancisco.Value;
+            Francisco.Inventory = GetNames(_saveFile.FranciscoInventory);
+
+            Glider.Health = _saveFile.HealthGlider / _gliderMaxHealth;
+            Glider.Inventory = GetNames(_saveFile.GliderNetInventory).Concat(GetNames(_saveFile.GliderWingInventory).Concat(GetNames(_saveFile.GliderBodyInventory))).ToList();
+
+            Inventory = GetNames(_saveFile.MainInventory);
+
+            Water = _saveFile.CurrentWater / _maxWater;
+        }
+
+        internal async Task Initialize()
+        {
+            SaveFile saveFile = null;
+            List<GameItem> items = null;
+            await Task.Run(() =>
             {
-                Health = saveFile.HealthAmelia / 10,
-                HasFracture = saveFile.FractureSickAmelia.Key,
-                IsSick = saveFile.FractureSickAmelia.Value,
-                Inventory = GetNames(saveFile.AmeliaInventory)
-            };
+                saveFile = FileHelper.GetSave();
+                items = FileHelper.GetItems();
+            });
 
-            Francisco = new HumanCharacterViewModel("Francisco")
+            while (saveFile == null)
             {
-                Health = saveFile.HealthFrancisco / 15,
-                HasFracture = saveFile.FractureSickFrancisco.Key,
-                IsSick = saveFile.FractureSickFrancisco.Value,
-                Inventory = GetNames(saveFile.FranciscoInventory)
-            };
+                saveFile = FileHelper.LoadSave(PromptSelectSaveFile());
+            }
 
-            Glider = new CharacterViewModel("Glider")
+            while (items == null)
             {
-                Health = saveFile.HealthGlider / _gliderMaxHealth,
-                Inventory = GetNames(saveFile.GliderNetInventory).Concat(GetNames(saveFile.GliderWingInventory).Concat(GetNames(saveFile.GliderBodyInventory))).ToList()
-            };
+                items = FileHelper.LoadItems(PromptSelectItemsFile());
+            }
 
-            Inventory = GetNames(saveFile.MainInventory);
-
-            Water = saveFile.CurrentWater / _maxWater;
+            InitiazeData(saveFile, items);
         }
 
         internal void HealAll()

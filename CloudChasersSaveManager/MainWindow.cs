@@ -1,6 +1,8 @@
 ﻿using CloudChasersSaveManager.Binding;
 using CloudChasersSaveManager.ViewModels;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using Terminal.Gui;
 
 namespace CloudChasersSaveManager
@@ -77,6 +79,32 @@ namespace CloudChasersSaveManager
             };
             this.Add(saveAndExitButton);
             saveAndExitButton.Clicked = bindSubject.SaveAndExit;
+
+            bindSubject.PromptSelectSaveFile = PromptSelectSaveFile;
+            bindSubject.PromptSelectItemsFile = PromptSelectItemsFile;
+        }
+
+        private string PromptSelectSaveFile()
+        {
+            var workDir = Environment.CurrentDirectory;
+            Environment.CurrentDirectory = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)).Parent.FullName;
+            var od = new OpenDialog("The save file cannot be located, please provide it:", "Save File");
+            do
+            {
+                Application.Run(od);
+            } while (od.FilePaths.Count == 0 || !File.Exists(od.FilePaths[0]));
+            Environment.CurrentDirectory = workDir;
+            return od.FilePaths[0];
+        }
+
+        private string PromptSelectItemsFile()
+        {
+            var od = new OpenDialog("The items file cannot be located, please provide it:", "Save File");
+            do
+            {
+                Application.Run(od);
+            } while (od.FilePaths.Count == 0 || !File.Exists(od.FilePaths[0]));
+            return od.FilePaths[0];
         }
     }
 }
