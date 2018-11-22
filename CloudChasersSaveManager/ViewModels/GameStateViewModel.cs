@@ -41,6 +41,8 @@ namespace CloudChasersSaveManager.ViewModels
 
         public Func<string> PromptSelectItemsFile { get; set; }
 
+        public Func<bool> PromptDisclaimer { get; set; }
+
         public GameStateViewModel()
         {
             Amelia = new HumanCharacterViewModel("Amelia");
@@ -84,11 +86,23 @@ namespace CloudChasersSaveManager.ViewModels
         {
             SaveFile saveFile = null;
             List<GameItem> items = null;
+
             await Task.Run(() =>
             {
+                // TODO save the pathes in settings
                 saveFile = FileHelper.GetSave();
                 items = FileHelper.GetItems();
             });
+
+            if (!Properties.Settings.Default.SkipDisclaimer)
+            {
+                var neverShowThatAgain = PromptDisclaimer();
+                if (neverShowThatAgain)
+                {
+                    Properties.Settings.Default.SkipDisclaimer = true;
+                    Properties.Settings.Default.Save();
+                }
+            }
 
             while (saveFile == null)
             {

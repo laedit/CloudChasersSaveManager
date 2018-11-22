@@ -9,10 +9,10 @@ namespace CloudChasersSaveManager
 {
     internal class MainWindow : Window
     {
-        private const int ButtonsAlignment = 100;
+        private const int ButtonsAlignment = 99;
 
         public MainWindow(GameStateViewModel bindSubject)
-            : base("Cloud Chasers save manager")
+            : base("Cloud Chasers Save Manager")
         {
             var binder = Binder.From(bindSubject);
 
@@ -82,6 +82,47 @@ namespace CloudChasersSaveManager
 
             bindSubject.PromptSelectSaveFile = PromptSelectSaveFile;
             bindSubject.PromptSelectItemsFile = PromptSelectItemsFile;
+            bindSubject.PromptDisclaimer = PromptDisclaimer;
+        }
+
+        private bool PromptDisclaimer()
+        {
+            var neverShowAgain = false;
+            var dialog = new Dialog("Disclaimer", 60, 12)
+            {
+                new Label(new Rect(0, 1, 54, 1), "Cloud Chasers Save Manager is not endorsed,")
+                {
+                    TextAlignment = TextAlignment.Centered
+                },
+                new Label(new Rect(0, 2, 54, 1), "sponsored, affiliated with or otherwise")
+                {
+                    TextAlignment = TextAlignment.Centered
+                },
+                new Label(new Rect(0, 3, 54, 1), "authorized by Blindflug Studios")
+                {
+                    TextAlignment = TextAlignment.Centered
+                }
+            };
+
+            var neverShowAgainCheckbox = new CheckBox("Please do not show me that again")
+            {
+                X = Pos.Center(),
+                Y = 5
+            };
+            dialog.Add(neverShowAgainCheckbox);
+
+            var ok = new Button("Ok")
+            {
+                Clicked = () =>
+                {
+                    neverShowAgain = neverShowAgainCheckbox.Checked;
+                    Application.RequestStop();
+                }
+            };
+            dialog.AddButton(ok);
+
+            Application.Run(dialog);
+            return neverShowAgain;
         }
 
         private string PromptSelectSaveFile()
