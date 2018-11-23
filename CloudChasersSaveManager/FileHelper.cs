@@ -34,11 +34,6 @@ namespace CloudChasersSaveManager
             }
         }
 
-        internal static SaveFile GetSave()
-        {
-            return LoadSave(GetSavePath());
-        }
-
         internal static SaveFile LoadSave(string savePath)
         {
             if (File.Exists(savePath))
@@ -67,7 +62,7 @@ namespace CloudChasersSaveManager
             return GetSavePath() + ".back";
         }
 
-        private static string GetSavePath()
+        internal static string GetSavePath()
         {
             return Path.Combine(Environment.ExpandEnvironmentVariables("%USERPROFILE%"), @"AppData\LocalLow\Blindflug_Studios\Cloud Chasers - Journey of Hope\saveGame.gd");
         }
@@ -81,11 +76,6 @@ namespace CloudChasersSaveManager
             }
 
             return null;
-        }
-
-        internal static List<GameItem> GetItems()
-        {
-            return LoadItems(GetItemsPath());
         }
 
         internal static List<GameItem> LoadItems(string itemsFilePath)

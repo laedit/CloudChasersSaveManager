@@ -34,5 +34,29 @@ namespace CloudChasersSaveManager.Properties {
                 this["SkipDisclaimer"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string SaveFilePath {
+            get {
+                return ((string)(this["SaveFilePath"]));
+            }
+            set {
+                this["SaveFilePath"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string ItemsFilePath {
+            get {
+                return ((string)(this["ItemsFilePath"]));
+            }
+            set {
+                this["ItemsFilePath"] = value;
+            }
+        }
     }
 }

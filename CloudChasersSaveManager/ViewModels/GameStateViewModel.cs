@@ -1,4 +1,5 @@
 ﻿using CloudChasersSaveManager.Binding;
+using CloudChasersSaveManager.Properties;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -86,33 +87,46 @@ namespace CloudChasersSaveManager.ViewModels
         {
             SaveFile saveFile = null;
             List<GameItem> items = null;
+            string saveFilePath = Settings.Default.SaveFilePath;
+            string itemsFilePath = Settings.Default.ItemsFilePath;
 
             await Task.Run(() =>
             {
-                // TODO save the pathes in settings
-                saveFile = FileHelper.GetSave();
-                items = FileHelper.GetItems();
+                if (string.IsNullOrEmpty(saveFilePath))
+                {
+                    saveFilePath = FileHelper.GetSavePath();
+                }
+                saveFile = FileHelper.LoadSave(saveFilePath);
+                if (string.IsNullOrEmpty(itemsFilePath))
+                {
+                    itemsFilePath = FileHelper.GetItemsPath();
+                }
+                items = FileHelper.LoadItems(itemsFilePath);
             });
 
-            if (!Properties.Settings.Default.SkipDisclaimer)
+            if (!Settings.Default.SkipDisclaimer)
             {
                 var neverShowThatAgain = PromptDisclaimer();
                 if (neverShowThatAgain)
                 {
-                    Properties.Settings.Default.SkipDisclaimer = true;
-                    Properties.Settings.Default.Save();
+                    Settings.Default.SkipDisclaimer = true;
                 }
             }
 
             while (saveFile == null)
             {
-                saveFile = FileHelper.LoadSave(PromptSelectSaveFile());
+                saveFilePath = PromptSelectSaveFile();
+                saveFile = FileHelper.LoadSave(saveFilePath);
             }
+            Settings.Default.SaveFilePath = saveFilePath;
 
             while (items == null)
             {
-                items = FileHelper.LoadItems(PromptSelectItemsFile());
+                itemsFilePath = PromptSelectItemsFile();
+                items = FileHelper.LoadItems(itemsFilePath);
             }
+            Settings.Default.ItemsFilePath = itemsFilePath;
+            Settings.Default.Save();
 
             InitiazeData(saveFile, items);
         }
