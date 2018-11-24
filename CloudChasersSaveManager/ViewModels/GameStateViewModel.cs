@@ -106,11 +106,7 @@ namespace CloudChasersSaveManager.ViewModels
 
             if (!Settings.Default.SkipDisclaimer)
             {
-                var neverShowThatAgain = PromptDisclaimer();
-                if (neverShowThatAgain)
-                {
-                    Settings.Default.SkipDisclaimer = true;
-                }
+                Settings.Default.SkipDisclaimer = PromptDisclaimer();
             }
 
             while (saveFile == null)
