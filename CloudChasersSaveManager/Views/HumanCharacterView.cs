@@ -5,28 +5,6 @@ namespace CloudChasersSaveManager
 {
     internal class HumanCharacterView : CharacterView
     {
-        //private readonly CheckBox _hasFracture;
-        //private readonly CheckBox _isSick;
-
-        //public bool HasFracture
-        //{
-        //    get => _hasFracture.Checked;
-        //    set {
-        //        _hasFracture.Checked = value;
-        //        _hasFracture.SetNeedsDisplay();
-        //    }
-        //}
-
-        //public bool IsSick
-        //{
-        //    get => _isSick.Checked;
-        //    set
-        //    {
-        //        _isSick.Checked = value;
-        //        _isSick.SetNeedsDisplay();
-        //    }
-        //}
-
         public HumanCharacterView(HumanCharacterViewModel bindSubject)
         : base(bindSubject)
         {

@@ -7,25 +7,7 @@ namespace CloudChasersSaveManager
 {
     internal class CharacterView : FrameView
     {
-        //private float _health;
-        //private readonly ProgressBar _healthBar;
         protected readonly InventoryView _items;
-
-        //public void SetItems(IList<string> newItems)
-        //{
-        //    _items.SetItems(newItems);
-        //}
-
-        //public float Health
-        //{
-        //    get => _health;
-        //    set
-        //    {
-        //        _health = value;
-        //        _healthBar.Fraction = _health;
-        //        _healthBar.SetNeedsDisplay();
-        //    }
-        //}
 
         protected readonly Binder _binder;
 
