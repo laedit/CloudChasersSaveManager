@@ -93,15 +93,7 @@ namespace CloudChasersSaveManager
             var neverShowAgain = false;
             var dialog = new Dialog("Disclaimer", 60, 12)
             {
-                new Label(new Rect(0, 1, 54, 1), "Cloud Chasers Save Manager is not endorsed,")
-                {
-                    TextAlignment = TextAlignment.Centered
-                },
-                new Label(new Rect(0, 2, 54, 1), "sponsored, affiliated with or otherwise")
-                {
-                    TextAlignment = TextAlignment.Centered
-                },
-                new Label(new Rect(0, 3, 54, 1), "authorized by Blindflug Studios")
+                new Views.LabelFix(new Rect(0, 1, 54, 3), "Cloud Chasers Save Manager is not endorsed,\nsponsored, affiliated with or otherwise\nauthorized by Blindflug Studios")
                 {
                     TextAlignment = TextAlignment.Centered
                 }
