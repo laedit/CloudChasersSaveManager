@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Terminal.Gui;
 
 namespace CloudChasersSaveManager.ViewModels
 {
@@ -43,6 +42,12 @@ namespace CloudChasersSaveManager.ViewModels
         public Func<string> PromptSelectItemsFile { get; set; }
 
         public Func<bool> PromptDisclaimer { get; set; }
+
+        public Action CloseApplication { get; set; }
+
+        public Func<bool> PromptRestoreSave { get; set; }
+
+        public Action InformBackupRestored { get; set; }
 
         public GameStateViewModel()
         {
@@ -167,11 +172,11 @@ namespace CloudChasersSaveManager.ViewModels
 
         internal void RestorePreviousSave()
         {
-            if (1 == MessageBox.Query(107, 7, "Are you sure to restore the backuped save?", "This will override current modifications and will replace your genuine save if you haven't modified it.", "No", "Yes"))
+            if (PromptRestoreSave())
             {
                 FileHelper.RestoreSaveFile();
-                MessageBox.Query(107, 7, "Backup restored", "The restore is complete and the application will exit.", "Ok");
-                Application.RequestStop();
+                InformBackupRestored();
+                CloseApplication();
             }
         }
 
@@ -180,7 +185,7 @@ namespace CloudChasersSaveManager.ViewModels
             _saveFile.FractureSickAmelia = new KeyValuePair<bool, bool>(Amelia.HasFracture, Amelia.IsSick);
             _saveFile.FractureSickFrancisco = new KeyValuePair<bool, bool>(Francisco.HasFracture, Francisco.IsSick);
             FileHelper.ReplaceSaveFile(_saveFile);
-            Application.RequestStop();
+            CloseApplication();
         }
 
         private List<string> GetNames(List<KeyValuePair<int, int>> rawInventory)

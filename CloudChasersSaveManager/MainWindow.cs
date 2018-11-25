@@ -83,6 +83,9 @@ namespace CloudChasersSaveManager
             bindSubject.PromptSelectSaveFile = PromptSelectSaveFile;
             bindSubject.PromptSelectItemsFile = PromptSelectItemsFile;
             bindSubject.PromptDisclaimer = PromptDisclaimer;
+            bindSubject.CloseApplication = CloseApplicetion;
+            bindSubject.PromptRestoreSave = PromptRestoreSave;
+            bindSubject.InformBackupRestored = InformBackupRestored;
         }
 
         private bool PromptDisclaimer()
@@ -116,7 +119,7 @@ namespace CloudChasersSaveManager
                 Clicked = () =>
                 {
                     neverShowAgain = neverShowAgainCheckbox.Checked;
-                    Application.RequestStop();
+                    CloseApplicetion();
                 }
             };
             dialog.AddButton(ok);
@@ -146,6 +149,21 @@ namespace CloudChasersSaveManager
                 Application.Run(od);
             } while (od.FilePaths.Count == 0 || !File.Exists(od.FilePaths[0]));
             return od.FilePaths[0];
+        }
+
+        private void CloseApplicetion()
+        {
+            Application.RequestStop();
+        }
+
+        private bool PromptRestoreSave()
+        {
+            return 1 == MessageBox.Query(107, 7, "Are you sure to restore the backuped save?", "This will override current modifications and will replace your genuine save if you haven't modified it.", "No", "Yes");
+        }
+
+        private void InformBackupRestored()
+        {
+            MessageBox.Query(107, 7, "Backup restored", "The restore is complete and the application will exit.", "Ok");
         }
     }
 }
