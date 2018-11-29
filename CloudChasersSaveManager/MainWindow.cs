@@ -27,7 +27,7 @@ namespace CloudChasersSaveManager
 
             var waterFrame = new FrameView("Water") { X = 1, Y = 12, Width = 89, Height = 5 };
             this.Add(waterFrame);
-            var waterProgressBar = new ProgressBar { Y = 1, Width = 86 };
+            var waterProgressBar = new ProgressBar { X = 1, Y = 1, Width = 85 };
             waterFrame.Add(waterProgressBar);
             binder.Bind<float>(nameof(bindSubject.Water), newValue => waterProgressBar.Fraction = newValue);
 
