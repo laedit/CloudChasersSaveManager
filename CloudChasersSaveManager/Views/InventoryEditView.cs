@@ -20,13 +20,14 @@ namespace CloudChasersSaveManager.Views
                         if (index < newItems.Count)
                         {
                             var currentItem = newItems[index];
-                            var itemButton = new Button(j * columnWidth, i, currentItem.Item2);
+                            var itemButton = new Button(j * columnWidth, i, FormatName(currentItem.Item2));
                             itemButton.Id = index.ToString();
                             itemButton.Clicked = () =>
                                 {
                                     var iss = new ItemSelector();
                                     Application.Run(iss);
-                                    itemButton.Text = iss.SelectedItem.ItemName;
+                                    itemButton.Text = FormatName(iss.SelectedItem.ItemName);
+                                    this.SetNeedsDisplay();
                                     newItems[int.Parse(itemButton.Id.ToString())] = new Tuple<int, string>(iss.SelectedItem.ItemId, iss.SelectedItem.ItemName);
                                 };
                             Add(itemButton);
@@ -47,6 +48,15 @@ namespace CloudChasersSaveManager.Views
         public InventoryEditView(int columns)
         {
             Columns = columns;
+        }
+
+        private static string FormatName(string itemName)
+        {
+            if(itemName.Length > 16)
+            {
+                return itemName.Substring(0, 16);
+            }
+            return itemName;
         }
     }
 }
