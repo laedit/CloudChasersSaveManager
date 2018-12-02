@@ -1,4 +1,5 @@
 ﻿using CloudChasersSaveManager.Binding;
+using CloudChasersSaveManager.Models;
 using CloudChasersSaveManager.Properties;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,6 @@ namespace CloudChasersSaveManager.ViewModels
     internal class GameStateViewModel : ViewModel
     {
         private SaveFile _saveFile;
-        private List<GameItem> _items;
 
         private float _gliderMaxHealth;
         private float _maxWater;
@@ -23,9 +23,9 @@ namespace CloudChasersSaveManager.ViewModels
             set => SetField(ref _waterFraction, value);
         }
 
-        private IList<string> _inventory;
+        private IList<Tuple<int, string>> _inventory;
 
-        public IList<string> Inventory
+        public IList<Tuple<int, string>> Inventory
         {
             get => _inventory;
             set => SetField(ref _inventory, value);
@@ -56,34 +56,48 @@ namespace CloudChasersSaveManager.ViewModels
             Glider = new CharacterViewModel("Glider");
         }
 
-        private void InitiazeData(SaveFile saveFile, List<GameItem> items)
+        private void InitializeData(SaveFile saveFile, IEnumerable<GameItem> items)
         {
             _saveFile = saveFile;
-            _items = items;
 
             // base 20 + items in inventory with maxHealth
             _gliderMaxHealth = 20
-                + _saveFile.GliderBodyInventory.Sum(item => _items.Find(gi => gi.ItemId == item.Value).MaxHealth)
-                 + _saveFile.GliderNetInventory.Sum(item => _items.Find(gi => gi.ItemId == item.Value).MaxHealth)
-                  + _saveFile.GliderWingInventory.Sum(item => _items.Find(gi => gi.ItemId == item.Value).MaxHealth);
+                + _saveFile.GliderBodyInventory.Sum(item => items.FirstOrDefault(gi => gi.ItemId == item.Value).MaxHealth)
+                 + _saveFile.GliderNetInventory.Sum(item => items.FirstOrDefault(gi => gi.ItemId == item.Value).MaxHealth)
+                  + _saveFile.GliderWingInventory.Sum(item => items.FirstOrDefault(gi => gi.ItemId == item.Value).MaxHealth);
 
             // base 100 + items in inventory with waterStorage
-            _maxWater = 100 + _saveFile.MainInventory.Sum(item => _items.Find(gi => gi.ItemId == item.Value).WaterStorage);
+            _maxWater = 100 + _saveFile.MainInventory.Sum(item => items.FirstOrDefault(gi => gi.ItemId == item.Value).WaterStorage);
 
             Amelia.Health = _saveFile.HealthAmelia / 10;
             Amelia.HasFracture = _saveFile.FractureSickAmelia.Key;
             Amelia.IsSick = _saveFile.FractureSickAmelia.Value;
-            Amelia.Inventory = GetNames(_saveFile.AmeliaInventory);
+            Amelia.Inventory = _saveFile.AmeliaInventory.GetNames().ToList();
 
             Francisco.Health = _saveFile.HealthFrancisco / 15;
             Francisco.HasFracture = _saveFile.FractureSickFrancisco.Key;
             Francisco.IsSick = _saveFile.FractureSickFrancisco.Value;
-            Francisco.Inventory = GetNames(_saveFile.FranciscoInventory);
+            Francisco.Inventory = _saveFile.FranciscoInventory.GetNames().ToList();
 
             Glider.Health = _saveFile.HealthGlider / _gliderMaxHealth;
-            Glider.Inventory = GetNames(_saveFile.GliderNetInventory).Concat(GetNames(_saveFile.GliderWingInventory).Concat(GetNames(_saveFile.GliderBodyInventory))).ToList();
+            Glider.Inventory = _saveFile.GliderNetInventory.Concat(_saveFile.GliderWingInventory)
+                                .Concat(_saveFile.GliderBodyInventory).GetNames().ToList();
 
-            Inventory = GetNames(_saveFile.MainInventory);
+            var inventoryMax = 8;
+            if (_saveFile.FranciscoInventory.Select(kvp => items.FirstOrDefault(item => item.ItemId == kvp.Value)).Any(gi => gi.InventoryRows > 0))
+            {
+                inventoryMax += 4;
+            }
+            if (_saveFile.AmeliaInventory.Select(kvp => items.FirstOrDefault(item => item.ItemId == kvp.Value)).Any(gi => gi.InventoryRows > 0))
+            {
+                inventoryMax += 4;
+            }
+            var inventory = _saveFile.MainInventory.GetNamesAndIds().ToList();
+            for (int i = inventory.Count; i < inventoryMax; i++)
+            {
+                inventory.Add(new Tuple<int, string>(-1, "Empty"));
+            }
+            Inventory = inventory;
 
             Water = _saveFile.CurrentWater / _maxWater;
         }
@@ -91,7 +105,7 @@ namespace CloudChasersSaveManager.ViewModels
         internal async Task Initialize()
         {
             SaveFile saveFile = null;
-            List<GameItem> items = null;
+            var itemsLoaded = false;
             string saveFilePath = Settings.Default.SaveFilePath;
             string itemsFilePath = Settings.Default.ItemsFilePath;
 
@@ -106,7 +120,7 @@ namespace CloudChasersSaveManager.ViewModels
                 {
                     itemsFilePath = FileHelper.GetItemsPath();
                 }
-                items = FileHelper.LoadItems(itemsFilePath);
+                itemsLoaded = GameItems.Load(itemsFilePath);
             });
 
             if (!Settings.Default.SkipDisclaimer)
@@ -121,15 +135,15 @@ namespace CloudChasersSaveManager.ViewModels
             }
             Settings.Default.SaveFilePath = saveFilePath;
 
-            while (items == null)
+            while (!itemsLoaded)
             {
                 itemsFilePath = PromptSelectItemsFile();
-                items = FileHelper.LoadItems(itemsFilePath);
+                itemsLoaded = GameItems.Load(itemsFilePath);
             }
             Settings.Default.ItemsFilePath = itemsFilePath;
             Settings.Default.Save();
 
-            InitiazeData(saveFile, items);
+            InitializeData(saveFile, GameItems.GetAll());
         }
 
         internal void HealAll()
@@ -184,13 +198,19 @@ namespace CloudChasersSaveManager.ViewModels
         {
             _saveFile.FractureSickAmelia = new KeyValuePair<bool, bool>(Amelia.HasFracture, Amelia.IsSick);
             _saveFile.FractureSickFrancisco = new KeyValuePair<bool, bool>(Francisco.HasFracture, Francisco.IsSick);
+
+            _saveFile.MainInventory.Clear();
+            for (int i = 0; i < Inventory.Count; i++)
+            {
+                var currentItem = Inventory[i];
+                if(currentItem.Item1 != -1)
+                {
+                    _saveFile.MainInventory.Add(new KeyValuePair<int, int>(i, currentItem.Item1));
+                }
+            }
+            
             FileHelper.ReplaceSaveFile(_saveFile);
             CloseApplication();
-        }
-
-        private List<string> GetNames(List<KeyValuePair<int, int>> rawInventory)
-        {
-            return rawInventory.Select(kvp => _items.Find(item => item.ItemId == kvp.Value).ItemName).ToList();
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.Win32;
+﻿using CloudChasersSaveManager.Models;
+using Microsoft.Win32;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;

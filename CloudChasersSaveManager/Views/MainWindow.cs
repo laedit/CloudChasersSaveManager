@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using Terminal.Gui;
 
-namespace CloudChasersSaveManager
+namespace CloudChasersSaveManager.Views
 {
     internal class MainWindow : Window
     {
@@ -31,11 +31,11 @@ namespace CloudChasersSaveManager
             waterFrame.Add(waterProgressBar);
             binder.Bind<float>(nameof(bindSubject.Water), newValue => waterProgressBar.Fraction = newValue);
 
-            var inventoryFrame = new FrameView("Inventory") { X = 1, Y = 19, Width = 89, Height = 6 };
+            var inventoryFrame = new FrameView("Inventory") { X = 1, Y = 19, Width = 89, Height = 7 };
             this.Add(inventoryFrame);
-            var inventoryView = new InventoryView(4);
+            var inventoryView = new InventoryEditView(4);
             inventoryFrame.Add(inventoryView);
-            binder.Bind<IList<string>>(nameof(bindSubject.Inventory), inventoryView.SetItems);
+            binder.Bind<IList<Tuple<int, string>>>(nameof(bindSubject.Inventory), inventoryView.SetItems);
 
             var healAllButton = new Button("Heal all")
             {
@@ -93,7 +93,7 @@ namespace CloudChasersSaveManager
             var neverShowAgain = false;
             var dialog = new Dialog("Disclaimer", 60, 12)
             {
-                new Views.LabelFix(new Rect(0, 1, 54, 3), "Cloud Chasers Save Manager is not endorsed,\nsponsored, affiliated with or otherwise\nauthorized by Blindflug Studios")
+                new LabelFix(new Rect(0, 1, 54, 3), "Cloud Chasers Save Manager is not endorsed,\nsponsored, affiliated with or otherwise\nauthorized by Blindflug Studios")
                 {
                     TextAlignment = TextAlignment.Centered
                 }

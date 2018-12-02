@@ -24,7 +24,7 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>false</MapFileExtensions>
     <AutorunEnabled>true</AutorunEnabled>
-    <ApplicationRevision>2</ApplicationRevision>
+    <ApplicationRevision>4</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -75,6 +75,7 @@
     <Compile Include="Binding\Binder.cs" />
     <Compile Include="Binding\INotifyPropertyValueChanged.cs" />
     <Compile Include="Binding\ViewModel.cs" />
+    <Compile Include="Models\GameItems.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
@@ -84,13 +85,15 @@
     <Compile Include="ViewModels\CharacterViewModel.cs" />
     <Compile Include="Views\CharacterView.cs" />
     <Compile Include="FileHelper.cs" />
-    <Compile Include="GameItem.cs" />
+    <Compile Include="Models\GameItem.cs" />
     <Compile Include="ViewModels\GameStateViewModel.cs" />
     <Compile Include="Views\HumanCharacterView.cs" />
-    <Compile Include="MainWindow.cs" />
+    <Compile Include="Views\MainWindow.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Views\InventoryEditView.cs" />
     <Compile Include="Views\InventoryView.cs" />
+    <Compile Include="Views\ItemSelector.cs" />
     <Compile Include="Views\LabelFix.cs" />
   </ItemGroup>
   <ItemGroup>

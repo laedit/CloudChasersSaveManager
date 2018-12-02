@@ -1,7 +1,7 @@
 ﻿using CloudChasersSaveManager.ViewModels;
 using Terminal.Gui;
 
-namespace CloudChasersSaveManager
+namespace CloudChasersSaveManager.Views
 {
     internal class HumanCharacterView : CharacterView
     {

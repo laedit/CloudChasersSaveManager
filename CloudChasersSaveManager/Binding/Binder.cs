@@ -6,7 +6,7 @@ namespace CloudChasersSaveManager.Binding
     internal sealed class Binder
     {
         private readonly Dictionary<string, Delegate> _bindings = new Dictionary<string, Delegate>();
-        
+
         private readonly INotifyPropertyValueChanged _npcSubject;
         private readonly Type _npcType;
 
@@ -25,10 +25,10 @@ namespace CloudChasersSaveManager.Binding
         internal void Bind<TArg>(string propertyName, Action<TArg> notificationAction)
         {
             notificationAction((TArg)_npcType.GetProperty(propertyName).GetValue(_npcSubject));
-            
+
             _bindings.Add(propertyName, notificationAction);
         }
-        
+
         private void ViewModel_PropertyValueChanged(object sender, PropertyValueChangedEventArgs e)
         {
             if (_bindings.ContainsKey(e.PropertyName))
